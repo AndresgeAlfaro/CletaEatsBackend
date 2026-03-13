@@ -14,8 +14,7 @@ namespace CletaEatsBackend.AccesoDatos
             {
                 using var conn = _db.GetConnection(); conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"INSERT INTO Restaurante (nombre, cedulaJuridica, direccion, tipoComida)
-VALUES (@nom, @ced, @dir, @tipo)";
+                cmd.CommandText = _db.GetSqlProcedimiento("Restaurante_Insertar");
                 cmd.Parameters.AddWithValue("@nom", r.Nombre);
                 cmd.Parameters.AddWithValue("@ced", r.CedulaJuridica);
                 cmd.Parameters.AddWithValue("@dir", r.Direccion);
@@ -31,7 +30,7 @@ VALUES (@nom, @ced, @dir, @tipo)";
             var lista = new List<Restaurante>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Restaurante ORDER BY nombre";
+            cmd.CommandText = _db.GetSqlProcedimiento("Restaurante_ObtenerTodos");
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
             return lista;
@@ -41,7 +40,7 @@ VALUES (@nom, @ced, @dir, @tipo)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Restaurante WHERE id = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Restaurante_BuscarPorId");
             cmd.Parameters.AddWithValue("@id", id);
             using var r = cmd.ExecuteReader();
             return r.Read() ? Mapear(r) : null;
@@ -51,7 +50,7 @@ VALUES (@nom, @ced, @dir, @tipo)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Restaurante WHERE cedulaJuridica = @ced";
+            cmd.CommandText = _db.GetSqlProcedimiento("Restaurante_BuscarPorCedulaJuridica");
             cmd.Parameters.AddWithValue("@ced", cedulaJuridica);
             using var r = cmd.ExecuteReader();
             return r.Read() ? Mapear(r) : null;

@@ -14,9 +14,7 @@ namespace CletaEatsBackend.AccesoDatos
             {
                 using var conn = _db.GetConnection(); conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"INSERT INTO Repartidor
-(nombre, cedula, correo, direccion, celular, tarjeta, estado, distanciaPedido, kmDiarios, amonestaciones)
-VALUES (@nom, @ced, @cor, @dir, @cel, @tar, @est, @dist, @km, @amon)";
+                cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_Insertar");
                 cmd.Parameters.AddWithValue("@nom", r.Nombre);
                 cmd.Parameters.AddWithValue("@ced", r.Cedula);
                 cmd.Parameters.AddWithValue("@cor", r.CorreoElectronico);
@@ -38,7 +36,7 @@ VALUES (@nom, @ced, @cor, @dir, @cel, @tar, @est, @dist, @km, @amon)";
             var lista = new List<Repartidor>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Repartidor";
+            cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_ObtenerTodos");
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
             return lista;
@@ -48,9 +46,7 @@ VALUES (@nom, @ced, @cor, @dir, @cel, @tar, @est, @dist, @km, @amon)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT * FROM Repartidor
-WHERE estado = 'DISPONIBLE' AND amonestaciones < 4
-ORDER BY id LIMIT 1";
+            cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_ObtenerPrimerDisponible");
             using var r = cmd.ExecuteReader();
             return r.Read() ? Mapear(r) : null;
         }
@@ -59,7 +55,7 @@ ORDER BY id LIMIT 1";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE Repartidor SET estado = @est WHERE id = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_ActualizarEstado");
             cmd.Parameters.AddWithValue("@est", estado.ToString());
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
@@ -69,10 +65,7 @@ ORDER BY id LIMIT 1";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"UPDATE Repartidor
-SET amonestaciones = amonestaciones + 1,
-estado = CASE WHEN amonestaciones + 1 >= 4 THEN 'EXPULSADO' ELSE estado END
-WHERE id = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_IncrementarAmonestacion");
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();
         }

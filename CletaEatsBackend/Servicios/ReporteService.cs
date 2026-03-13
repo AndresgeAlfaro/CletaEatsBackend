@@ -13,8 +13,7 @@ namespace CletaEatsBackend.LogicaNegocio
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT nombreRestaurante, totalPedidos
-FROM vw_PedidosPorRestaurante ORDER BY totalPedidos DESC LIMIT 1";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_RestauranteConMasPedidos");
             using var r = cmd.ExecuteReader();
             return r.Read()
                 ? $"Restaurante con mas pedidos: {r.GetString(0)} ({r.GetInt64(1)} pedidos)"
@@ -27,7 +26,7 @@ FROM vw_PedidosPorRestaurante ORDER BY totalPedidos DESC LIMIT 1";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT nombreRestaurante, montoTotal FROM vw_PedidosPorRestaurante";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_MontoPorRestaurante");
             using var r = cmd.ExecuteReader();
             while (r.Read())
                 lista.Add((r.GetString(0), r.GetDouble(1)));
@@ -39,7 +38,7 @@ FROM vw_PedidosPorRestaurante ORDER BY totalPedidos DESC LIMIT 1";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT COALESCE(SUM(total), 0) FROM Factura";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_MontoTotalGeneral");
             return Convert.ToDouble(cmd.ExecuteScalar());
         }
 
@@ -48,8 +47,7 @@ FROM vw_PedidosPorRestaurante ORDER BY totalPedidos DESC LIMIT 1";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT nombreRestaurante, totalPedidos
-FROM vw_PedidosPorRestaurante ORDER BY totalPedidos ASC LIMIT 1";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_RestauranteConMenosPedidos");
             using var r = cmd.ExecuteReader();
             return r.Read()
                 ? $"Restaurante con menos pedidos: {r.GetString(0)} ({r.GetInt64(1)} pedidos)"
@@ -62,10 +60,7 @@ FROM vw_PedidosPorRestaurante ORDER BY totalPedidos ASC LIMIT 1";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT rp.nombre, rp.cedula, q.id, q.fecha, q.categoria, q.descripcion
-FROM Repartidor rp
-LEFT JOIN Queja q ON q.idRepartidor = rp.id
-ORDER BY rp.nombre, q.fecha";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_QuejasPorRepartidor");
             using var r = cmd.ExecuteReader();
             string repActual = "";
             while (r.Read())
@@ -90,10 +85,7 @@ ORDER BY rp.nombre, q.fecha";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT c.nombre, c.cedula, p.id, p.horaRealizacion, p.estado
-FROM Cliente c
-LEFT JOIN Pedido p ON p.idCliente = c.id
-ORDER BY c.nombre, p.horaRealizacion";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_PedidosPorCliente");
             using var r = cmd.ExecuteReader();
             string cliActual = "";
             while (r.Read())
@@ -117,8 +109,7 @@ ORDER BY c.nombre, p.horaRealizacion";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT nombreCliente, cedula, totalPedidos
-FROM vw_PedidosPorCliente ORDER BY totalPedidos DESC LIMIT 1";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_ClienteConMasPedidos");
             using var r = cmd.ExecuteReader();
             return r.Read()
                 ? $"Cliente con mas pedidos: {r.GetString(0)} (Cedula: {r.GetString(1)}) con {r.GetInt64(2)} pedidos."
@@ -130,8 +121,7 @@ FROM vw_PedidosPorCliente ORDER BY totalPedidos DESC LIMIT 1";
             using var conn = DatabaseManager.Instance.GetConnection();
             conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"SELECT SUBSTR(horaRealizacion, 12, 2) AS hora, COUNT(*) AS cnt
-FROM Pedido GROUP BY hora ORDER BY cnt DESC LIMIT 1";
+            cmd.CommandText = DatabaseManager.Instance.GetSqlProcedimiento("Reporte_HoraPico");
             using var r = cmd.ExecuteReader();
             return r.Read()
                 ? $"Hora pico: {r.GetString(0)}:00 hrs ({r.GetInt64(1)} pedidos)"

@@ -14,9 +14,7 @@ namespace CletaEatsBackend.AccesoDatos
             {
                 using var conn = _db.GetConnection(); conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"INSERT INTO Cliente
-(cedula, nombre, direccion, tarjeta, celular, correo, estado)
-VALUES (@ced, @nom, @dir, @tar, @cel, @cor, @est)";
+                cmd.CommandText = _db.GetSqlProcedimiento("Cliente_Insertar");
                 cmd.Parameters.AddWithValue("@ced", c.Cedula);
                 cmd.Parameters.AddWithValue("@nom", c.Nombre);
                 cmd.Parameters.AddWithValue("@dir", c.DireccionExacta);
@@ -35,7 +33,7 @@ VALUES (@ced, @nom, @dir, @tar, @cel, @cor, @est)";
             var lista = new List<Cliente>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Cliente ORDER BY nombre";
+            cmd.CommandText = _db.GetSqlProcedimiento("Cliente_ObtenerTodos");
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
             return lista;
@@ -45,7 +43,7 @@ VALUES (@ced, @nom, @dir, @tar, @cel, @cor, @est)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Cliente WHERE cedula = @ced";
+            cmd.CommandText = _db.GetSqlProcedimiento("Cliente_BuscarPorCedula");
             cmd.Parameters.AddWithValue("@ced", cedula);
             using var r = cmd.ExecuteReader();
             return r.Read() ? Mapear(r) : null;
@@ -61,7 +59,7 @@ VALUES (@ced, @nom, @dir, @tar, @cel, @cor, @est)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE Cliente SET estado = @est WHERE id = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Cliente_ActualizarEstado");
             cmd.Parameters.AddWithValue("@est", estado.ToString());
             cmd.Parameters.AddWithValue("@id", id);
             cmd.ExecuteNonQuery();

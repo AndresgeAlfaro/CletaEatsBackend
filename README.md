@@ -32,8 +32,9 @@ En la carpeta `CletaEatsBackend` (proyecto):
 - `CletaEatsBackend.csproj` – Proyecto de consola .NET 8 con referencia a `Microsoft.Data.Sqlite`.
 - `Program.cs` – Punto de entrada y menú principal en consola.
 - `Datos/`
-  - `DatabaseManager.cs` – Singleton que abre la conexión SQLite y ejecuta `schema.sql`.
-  - `schema.sql` – Define todas las tablas y vistas necesarias.
+  - `DatabaseManager.cs` – Singleton que abre la conexión SQLite, ejecuta `schema.sql` y expone `GetSqlProcedimiento(nombre)` para obtener el SQL de cada procedimiento almacenado.
+  - `schema.sql` – Define tablas, vistas y la tabla **`ProcedimientoAlmacenado`** con el texto SQL de cada operación (procedimientos almacenados).
+- **Procedimientos almacenados**: SQLite no tiene procedures nativos. Toda la SQL está guardada en la tabla `ProcedimientoAlmacenado` (nombre + SqlTexto). Los **DAOs solo invocan procedimientos** por nombre mediante `DatabaseManager.GetSqlProcedimiento("Nombre_Accion")` y ejecutan ese SQL; no escriben consultas inline en C#.
 - `Modelo/` – Clases de dominio (`Cliente`, `Restaurante`, `Repartidor`, `Pedido`, `ItemPedido`, `Factura`, `Queja`, enums).
 - `AccesoDatos/` – DAOs (`ClienteDAO`, `RestauranteDAO`, `RepartidorDAO`, `PedidoDAO`, `ItemPedidoDAO`, `FacturaDAO`, `QuejaDAO`, `ComboDAO`).
 - `LogicaNegocio/` – Services (`ClienteService`, `PedidoService`, `RepartidorService`, `ReporteService`).

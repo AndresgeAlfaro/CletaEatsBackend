@@ -14,8 +14,7 @@ namespace CletaEatsBackend.AccesoDatos
             {
                 using var conn = _db.GetConnection(); conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"INSERT INTO Combo (idRestaurante, numeroCombo, descripcion, precio)
-VALUES (@idRest, @num, @desc, @precio)";
+                cmd.CommandText = _db.GetSqlProcedimiento("Combo_Insertar");
                 cmd.Parameters.AddWithValue("@idRest", c.IdRestaurante);
                 cmd.Parameters.AddWithValue("@num", c.NumeroCombo);
                 cmd.Parameters.AddWithValue("@desc", c.Descripcion);
@@ -31,7 +30,7 @@ VALUES (@idRest, @num, @desc, @precio)";
             var lista = new List<Combo>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Combo WHERE idRestaurante = @id ORDER BY numeroCombo";
+            cmd.CommandText = _db.GetSqlProcedimiento("Combo_ObtenerPorRestaurante");
             cmd.Parameters.AddWithValue("@id", idRestaurante);
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
@@ -42,7 +41,7 @@ VALUES (@idRest, @num, @desc, @precio)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Combo WHERE idRestaurante = @id AND numeroCombo = @num";
+            cmd.CommandText = _db.GetSqlProcedimiento("Combo_BuscarPorRestauranteYNumero");
             cmd.Parameters.AddWithValue("@id", idRestaurante);
             cmd.Parameters.AddWithValue("@num", numeroCombo);
             using var r = cmd.ExecuteReader();

@@ -14,8 +14,7 @@ namespace CletaEatsBackend.AccesoDatos
             {
                 using var conn = _db.GetConnection(); conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"INSERT INTO Factura (idPedido, subtotal, costoTransporte, iva, total, fechaEmision)
-VALUES (@idPed, @sub, @trans, @iva, @total, @fecha)";
+                cmd.CommandText = _db.GetSqlProcedimiento("Factura_Insertar");
                 cmd.Parameters.AddWithValue("@idPed", f.IdPedido);
                 cmd.Parameters.AddWithValue("@sub", f.Subtotal);
                 cmd.Parameters.AddWithValue("@trans", f.CostoTransporte);
@@ -32,7 +31,7 @@ VALUES (@idPed, @sub, @trans, @iva, @total, @fecha)";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Factura WHERE idPedido = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Factura_BuscarPorPedido");
             cmd.Parameters.AddWithValue("@id", idPedido);
             using var r = cmd.ExecuteReader();
             return r.Read() ? Mapear(r) : null;

@@ -14,8 +14,7 @@ namespace CletaEatsBackend.AccesoDatos
             {
                 using var conn = _db.GetConnection(); conn.Open();
                 using var cmd = conn.CreateCommand();
-                cmd.CommandText = @"INSERT INTO Queja (idRepartidor, idPedido, idCliente, descripcion, fecha, categoria)
-VALUES (@idRep, @idPed, @idCli, @desc, @fecha, @cat)";
+                cmd.CommandText = _db.GetSqlProcedimiento("Queja_Insertar");
                 cmd.Parameters.AddWithValue("@idRep", q.IdRepartidor);
                 cmd.Parameters.AddWithValue("@idPed", q.IdPedido);
                 cmd.Parameters.AddWithValue("@idCli", q.IdCliente);
@@ -33,7 +32,7 @@ VALUES (@idRep, @idPed, @idCli, @desc, @fecha, @cat)";
             var lista = new List<Queja>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Queja ORDER BY fecha";
+            cmd.CommandText = _db.GetSqlProcedimiento("Queja_ObtenerTodas");
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
             return lista;
@@ -44,7 +43,7 @@ VALUES (@idRep, @idPed, @idCli, @desc, @fecha, @cat)";
             var lista = new List<Queja>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Queja WHERE idRepartidor = @id ORDER BY fecha";
+            cmd.CommandText = _db.GetSqlProcedimiento("Queja_ObtenerPorRepartidor");
             cmd.Parameters.AddWithValue("@id", idRepartidor);
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));

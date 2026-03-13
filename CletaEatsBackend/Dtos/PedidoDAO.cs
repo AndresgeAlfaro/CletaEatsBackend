@@ -11,34 +11,34 @@ namespace CletaEatsBackend.AccesoDatos
         public int Insertar(Pedido p)
         {
             using var conn = _db.GetConnection(); conn.Open();
-            using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"INSERT INTO Pedido
-(idCliente, idRestaurante, idRepartidor, horaRealizacion, estado)
-VALUES (@cli, @rest, @rep, @hora, @est);
-SELECT last_insert_rowid();";
-            cmd.Parameters.AddWithValue("@cli", p.IdCliente);
-            cmd.Parameters.AddWithValue("@rest", p.IdRestaurante);
-            cmd.Parameters.AddWithValue("@rep", p.IdRepartidor);
-            cmd.Parameters.AddWithValue("@hora", p.HoraRealizacion);
-            cmd.Parameters.AddWithValue("@est", p.Estado.ToString());
-            return Convert.ToInt32(cmd.ExecuteScalar());
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = _db.GetSqlProcedimiento("Pedido_Insertar");
+                cmd.Parameters.AddWithValue("@cli", p.IdCliente);
+                cmd.Parameters.AddWithValue("@rest", p.IdRestaurante);
+                cmd.Parameters.AddWithValue("@rep", p.IdRepartidor);
+                cmd.Parameters.AddWithValue("@hora", p.HoraRealizacion);
+                cmd.Parameters.AddWithValue("@est", p.Estado.ToString());
+                cmd.ExecuteNonQuery();
+            }
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = _db.GetSqlProcedimiento("LastInsertRowId");
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
         }
 
         public void ActualizarEstado(int id, EstadoPedido estado, string? horaEntrega = null)
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            if (horaEntrega != null)
-            {
-                cmd.CommandText = @"UPDATE Pedido SET estado = @est, horaEntrega = @hora WHERE id = @id";
-                cmd.Parameters.AddWithValue("@hora", horaEntrega);
-            }
-            else
-            {
-                cmd.CommandText = "UPDATE Pedido SET estado = @est WHERE id = @id";
-            }
+            cmd.CommandText = horaEntrega != null
+                ? _db.GetSqlProcedimiento("Pedido_ActualizarEstadoConHora")
+                : _db.GetSqlProcedimiento("Pedido_ActualizarEstado");
             cmd.Parameters.AddWithValue("@est", estado.ToString());
             cmd.Parameters.AddWithValue("@id", id);
+            if (horaEntrega != null)
+                cmd.Parameters.AddWithValue("@hora", horaEntrega);
             cmd.ExecuteNonQuery();
         }
 
@@ -47,7 +47,7 @@ SELECT last_insert_rowid();";
             var lista = new List<Pedido>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Pedido";
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_ObtenerTodos");
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
             return lista;
@@ -58,7 +58,7 @@ SELECT last_insert_rowid();";
             var lista = new List<Pedido>();
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Pedido WHERE idCliente = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_ObtenerPorCliente");
             cmd.Parameters.AddWithValue("@id", idCliente);
             using var r = cmd.ExecuteReader();
             while (r.Read()) lista.Add(Mapear(r));
@@ -69,7 +69,7 @@ SELECT last_insert_rowid();";
         {
             using var conn = _db.GetConnection(); conn.Open();
             using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT * FROM Pedido WHERE id = @id";
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_BuscarPorId");
             cmd.Parameters.AddWithValue("@id", id);
             using var r = cmd.ExecuteReader();
             return r.Read() ? Mapear(r) : null;

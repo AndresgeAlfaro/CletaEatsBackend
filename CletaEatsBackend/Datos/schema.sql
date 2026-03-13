@@ -123,3 +123,65 @@ SELECT
 FROM Cliente c
 LEFT JOIN Pedido p ON p.idCliente = c.id
 GROUP BY c.id, c.nombre, c.cedula;
+
+-- Tabla de procedimientos almacenados (SQLite no tiene procedures nativos; el SQL se guarda aqui y los DAOs solo los invocan por nombre)
+CREATE TABLE IF NOT EXISTS ProcedimientoAlmacenado (
+  Nombre TEXT PRIMARY KEY,
+  SqlTexto TEXT NOT NULL
+);
+
+-- Cliente
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Cliente_Insertar', 'INSERT INTO Cliente (cedula, nombre, direccion, tarjeta, celular, correo, estado) VALUES (@ced, @nom, @dir, @tar, @cel, @cor, @est)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Cliente_ObtenerTodos', 'SELECT * FROM Cliente ORDER BY nombre');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Cliente_BuscarPorCedula', 'SELECT * FROM Cliente WHERE cedula = @ced');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Cliente_ActualizarEstado', 'UPDATE Cliente SET estado = @est WHERE id = @id');
+
+-- Restaurante
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_Insertar', 'INSERT INTO Restaurante (nombre, cedulaJuridica, direccion, tipoComida) VALUES (@nom, @ced, @dir, @tipo)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_ObtenerTodos', 'SELECT * FROM Restaurante ORDER BY nombre');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_BuscarPorId', 'SELECT * FROM Restaurante WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_BuscarPorCedulaJuridica', 'SELECT * FROM Restaurante WHERE cedulaJuridica = @ced');
+
+-- Combo
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_Insertar', 'INSERT INTO Combo (idRestaurante, numeroCombo, descripcion, precio) VALUES (@idRest, @num, @desc, @precio)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_ObtenerPorRestaurante', 'SELECT * FROM Combo WHERE idRestaurante = @id ORDER BY numeroCombo');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_BuscarPorRestauranteYNumero', 'SELECT * FROM Combo WHERE idRestaurante = @id AND numeroCombo = @num');
+
+-- Repartidor
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_Insertar', 'INSERT INTO Repartidor (nombre, cedula, correo, direccion, celular, tarjeta, estado, distanciaPedido, kmDiarios, amonestaciones) VALUES (@nom, @ced, @cor, @dir, @cel, @tar, @est, @dist, @km, @amon)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_ObtenerTodos', 'SELECT * FROM Repartidor');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_ObtenerPrimerDisponible', 'SELECT * FROM Repartidor WHERE estado = ''DISPONIBLE'' AND amonestaciones < 4 ORDER BY id LIMIT 1');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_ActualizarEstado', 'UPDATE Repartidor SET estado = @est WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_IncrementarAmonestacion', 'UPDATE Repartidor SET amonestaciones = amonestaciones + 1, estado = CASE WHEN amonestaciones + 1 >= 4 THEN ''EXPULSADO'' ELSE estado END WHERE id = @id');
+
+-- Pedido
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_Insertar', 'INSERT INTO Pedido (idCliente, idRestaurante, idRepartidor, horaRealizacion, estado) VALUES (@cli, @rest, @rep, @hora, @est)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ActualizarEstado', 'UPDATE Pedido SET estado = @est WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ActualizarEstadoConHora', 'UPDATE Pedido SET estado = @est, horaEntrega = @hora WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ObtenerTodos', 'SELECT * FROM Pedido');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ObtenerPorCliente', 'SELECT * FROM Pedido WHERE idCliente = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_BuscarPorId', 'SELECT * FROM Pedido WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('LastInsertRowId', 'SELECT last_insert_rowid()');
+
+-- ItemPedido
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('ItemPedido_Insertar', 'INSERT INTO ItemPedido (idPedido, numeroCombo, descripcion, precioUnitario, cantidad) VALUES (@idPed, @num, @desc, @precio, @cant)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('ItemPedido_ObtenerPorPedido', 'SELECT * FROM ItemPedido WHERE idPedido = @id');
+
+-- Factura
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Factura_Insertar', 'INSERT INTO Factura (idPedido, subtotal, costoTransporte, iva, total, fechaEmision) VALUES (@idPed, @sub, @trans, @iva, @total, @fecha)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Factura_BuscarPorPedido', 'SELECT * FROM Factura WHERE idPedido = @id');
+
+-- Queja
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Queja_Insertar', 'INSERT INTO Queja (idRepartidor, idPedido, idCliente, descripcion, fecha, categoria) VALUES (@idRep, @idPed, @idCli, @desc, @fecha, @cat)');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Queja_ObtenerTodas', 'SELECT * FROM Queja ORDER BY fecha');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Queja_ObtenerPorRepartidor', 'SELECT * FROM Queja WHERE idRepartidor = @id ORDER BY fecha');
+
+-- Reportes
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_RestauranteConMasPedidos', 'SELECT nombreRestaurante, totalPedidos FROM vw_PedidosPorRestaurante ORDER BY totalPedidos DESC LIMIT 1');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_MontoPorRestaurante', 'SELECT nombreRestaurante, montoTotal FROM vw_PedidosPorRestaurante');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_MontoTotalGeneral', 'SELECT COALESCE(SUM(total), 0) FROM Factura');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_RestauranteConMenosPedidos', 'SELECT nombreRestaurante, totalPedidos FROM vw_PedidosPorRestaurante ORDER BY totalPedidos ASC LIMIT 1');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_QuejasPorRepartidor', 'SELECT rp.nombre, rp.cedula, q.id, q.fecha, q.categoria, q.descripcion FROM Repartidor rp LEFT JOIN Queja q ON q.idRepartidor = rp.id ORDER BY rp.nombre, q.fecha');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_PedidosPorCliente', 'SELECT c.nombre, c.cedula, p.id, p.horaRealizacion, p.estado FROM Cliente c LEFT JOIN Pedido p ON p.idCliente = c.id ORDER BY c.nombre, p.horaRealizacion');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_ClienteConMasPedidos', 'SELECT nombreCliente, cedula, totalPedidos FROM vw_PedidosPorCliente ORDER BY totalPedidos DESC LIMIT 1');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_HoraPico', 'SELECT SUBSTR(horaRealizacion, 12, 2) AS hora, COUNT(*) AS cnt FROM Pedido GROUP BY hora ORDER BY cnt DESC LIMIT 1');

@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CletaEatsBackend.Datos
@@ -8,6 +9,7 @@ namespace CletaEatsBackend.Datos
     {
         private static DatabaseManager? _instance;
         private static readonly object _lock = new object();
+        private static Dictionary<string, string>? _procedimientosCache;
         private const string DbPath = "cletaeats.db";
 
         public static DatabaseManager Instance
@@ -26,6 +28,33 @@ namespace CletaEatsBackend.Datos
 
         public SqliteConnection GetConnection() =>
             new SqliteConnection($"Data Source={DbPath}");
+
+        /// <summary>
+        /// Obtiene el texto SQL del procedimiento almacenado por nombre.
+        /// Los DAOs solo deben ejecutar SQL obtenido mediante este metodo.
+        /// </summary>
+        public string GetSqlProcedimiento(string nombre)
+        {
+            if (_procedimientosCache != null && _procedimientosCache.TryGetValue(nombre, out string? sql))
+                return sql;
+            lock (_lock)
+            {
+                _procedimientosCache ??= new Dictionary<string, string>();
+                if (_procedimientosCache.TryGetValue(nombre, out sql))
+                    return sql;
+                using var conn = GetConnection();
+                conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT SqlTexto FROM ProcedimientoAlmacenado WHERE Nombre = @nom";
+                cmd.Parameters.AddWithValue("@nom", nombre);
+                var obj = cmd.ExecuteScalar();
+                if (obj == null || obj == DBNull.Value)
+                    throw new InvalidOperationException($"Procedimiento almacenado no encontrado: {nombre}");
+                sql = (string)obj;
+                _procedimientosCache[nombre] = sql;
+                return sql;
+            }
+        }
 
         private void InicializarBD()
         {
