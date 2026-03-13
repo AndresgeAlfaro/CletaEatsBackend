@@ -1,4 +1,5 @@
 using CletaEatsBackend.LogicaNegocio;
+using CletaEatsBackend.Modelo;
 
 namespace CletaEatsBackend.Control
 {
@@ -15,6 +16,9 @@ namespace CletaEatsBackend.Control
         {
             return _service.VerificarAcceso(cedula);
         }
+
+        public List<Cliente> GetActivos() => _service.ObtenerActivos();
+        public List<Cliente> GetSuspendidos() => _service.ObtenerSuspendidos();
 
         public void MostrarActivos()
         {

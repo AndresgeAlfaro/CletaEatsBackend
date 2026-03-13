@@ -1,23 +1,22 @@
-## CletaEatsBackend — Módulo 0 (Backend C# con SQLite)
+# CletaEats Backend — Módulo 0 (API C# con SQLite)
 
-Este proyecto es el **backend en C# puro** del sistema CletaEats (Módulo 0 de la especificación).  
-Implementa las 4 capas clásicas:
+Backend del sistema CletaEats en **C# con ASP.NET Core**. Expone una **API REST** en HTTP y usa SQLite como base de datos.
+
+Implementa las capas:
 
 - **Datos**: conexión SQLite y script `schema.sql`.
 - **AccesoDatos**: DAOs para todas las entidades.
 - **Modelo**: clases de dominio (Cliente, Restaurante, Pedido, etc.).
-- **Control / Lógica de negocio**: Services + Controllers + menú de consola.
-
-El backend expone un **menú de consola** para registrar información y ejecutar los reportes.
+- **Control / Lógica de negocio**: Services + Controllers.
+- **Api**: controladores HTTP que exponen los endpoints REST (JSON).
 
 ---
 
 ## Requisitos
 
-- **.NET SDK 8.0 o superior** (el proyecto está en `net8.0`).
-- Sistema operativo: Windows, macOS o Linux.
+- **.NET SDK 8.0** o superior.
 
-Puedes comprobar tu versión con:
+Comprobar versión:
 
 ```bash
 dotnet --version
@@ -27,144 +26,108 @@ dotnet --version
 
 ## Estructura principal
 
-En la carpeta `CletaEatsBackend` (proyecto):
+Dentro de `CletaEatsBackend` (proyecto):
 
-- `CletaEatsBackend.csproj` – Proyecto de consola .NET 8 con referencia a `Microsoft.Data.Sqlite`.
-- `Program.cs` – Punto de entrada y menú principal en consola.
-- `Datos/`
-  - `DatabaseManager.cs` – Singleton que abre la conexión SQLite, ejecuta `schema.sql` y expone `GetSqlProcedimiento(nombre)` para obtener el SQL de cada procedimiento almacenado.
-  - `schema.sql` – Define tablas, vistas y la tabla **`ProcedimientoAlmacenado`** con el texto SQL de cada operación (procedimientos almacenados).
-- **Procedimientos almacenados**: SQLite no tiene procedures nativos. Toda la SQL está guardada en la tabla `ProcedimientoAlmacenado` (nombre + SqlTexto). Los **DAOs solo invocan procedimientos** por nombre mediante `DatabaseManager.GetSqlProcedimiento("Nombre_Accion")` y ejecutan ese SQL; no escriben consultas inline en C#.
-- `Modelo/` – Clases de dominio (`Cliente`, `Restaurante`, `Repartidor`, `Pedido`, `ItemPedido`, `Factura`, `Queja`, enums).
-- `AccesoDatos/` – DAOs (`ClienteDAO`, `RestauranteDAO`, `RepartidorDAO`, `PedidoDAO`, `ItemPedidoDAO`, `FacturaDAO`, `QuejaDAO`, `ComboDAO`).
-- `LogicaNegocio/` – Services (`ClienteService`, `PedidoService`, `RepartidorService`, `ReporteService`).
-- `Control/` – Controllers usados por `Program.cs`.
+| Carpeta / archivo | Descripción |
+|-------------------|-------------|
+| `CletaEatsBackend.csproj` | Proyecto .NET 8 (SDK Web) con `Microsoft.Data.Sqlite`. |
+| `Program.cs` | Configuración de la API: CORS, controladores, inicialización de BD. |
+| `Datos/` | `DatabaseManager.cs` (Singleton, SQLite), `schema.sql` (tablas, vistas, procedimientos almacenados). |
+| `Modelo/` | Clases de dominio: Cliente, Restaurante, Repartidor, Pedido, ItemPedido, Factura, Queja, Combo y enums. |
+| `Dtos/` | DAOs (AccesoDatos): ClienteDAO, RestauranteDAO, RepartidorDAO, PedidoDAO, ItemPedidoDAO, FacturaDAO, QuejaDAO, ComboDAO. |
+| `Servicios/` | Lógica de negocio: ClienteService, PedidoService, RepartidorService, ReporteService. |
+| `Control/` | Controllers de lógica: ClienteController, RestauranteController, RepartidorController, PedidoController, ReporteController. |
+| `Api/` | Controladores HTTP: ClientesApiController, RestaurantesApiController, RepartidoresApiController, PedidosApiController, ReportesApiController. |
 
-Al correr por primera vez, se crea automáticamente el archivo **`cletaeats.db`** en la carpeta de salida (`bin/Debug/net8.0`).
+La SQL de las operaciones está en la tabla **`ProcedimientoAlmacenado`**; los DAOs ejecutan ese SQL mediante `DatabaseManager.GetSqlProcedimiento(nombre)`.
+
+Al ejecutar por primera vez se crea **`cletaeats.db`** en el directorio de salida (o en el directorio de trabajo según la configuración de `DatabaseManager`).
 
 ---
 
-## Cómo compilar y ejecutar desde la terminal
+## Cómo ejecutar la API
 
-1. **Ir a la carpeta del proyecto de consola**
+1. Ir a la carpeta del proyecto:
 
    ```bash
-   cd "c:\Users\andre\Documents\Mobiles\Proyecto\Proyecto\Backend\CletaEatsBackend\CletaEatsBackend"
+   cd Backend/CletaEatsBackend/CletaEatsBackend
    ```
 
-2. **Restaurar/compilar (opcional, para verificar)**
+2. Compilar (opcional):
 
    ```bash
    dotnet build
    ```
 
-3. **Ejecutar el backend**
+3. Ejecutar:
 
    ```bash
    dotnet run
    ```
 
-   La primera vez:
-
-   - `DatabaseManager` ejecuta `Datos/schema.sql`.
-   - Se crea el archivo `cletaeats.db` con todas las tablas y vistas.
-   - Aparece el menú de consola.
+La API queda disponible en **http://localhost:5000**. CORS está configurado para permitir peticiones desde `http://localhost:5173` y `http://127.0.0.1:5173` (frontend en desarrollo).
 
 ---
 
-## Menú de consola
+## Endpoints de la API
 
-Cuando ejecutas `dotnet run` verás algo como:
+Base URL: `http://localhost:5000/api`
 
-```text
-========= CletaEats Backend =========
- 1. Registrar cliente
- 2. Registrar restaurante
- 3. Registrar repartidor
- 4. Realizar pedido
- 5. Marcar pedido como entregado
- 6. Reportes
- 0. Salir
- Opcion:
-```
+### Clientes (`/api/ClientesApi`)
 
-### 1. Registrar cliente
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/registrar` | Registrar cliente (body: cedula, nombre, direccion, tarjeta, celular, correo). |
+| GET | `/verificar/{cedula}` | Verificar estado del cliente (ACTIVO / SUSPENDIDO / NO_REGISTRADO). |
+| GET | `/activos` | Lista de clientes activos. |
+| GET | `/suspendidos` | Lista de clientes suspendidos. |
 
-Pide: cédula, nombre, dirección, tarjeta, celular, correo.  
-Valida que la cédula no esté repetida (usa `ClienteDAO.BuscarPorCedula`).
+### Restaurantes (`/api/RestaurantesApi`)
 
-### 2. Registrar restaurante
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/registrar` | Registrar restaurante (body: nombre, cedulaJuridica, direccion, tipoComida). |
+| GET | `/` | Lista de todos los restaurantes. |
+| GET | `/{idRestaurante}/combos` | Combos del restaurante. |
 
-Pide: nombre, cédula jurídica, dirección y tipo de comida  
-(`RAPIDA`, `CHINA`, `SALUDABLE`, `ITALIANA`, `MEXICANA`, `MARISCOS`, `OTRA`).
+Tipos de comida: `RAPIDA`, `CHINA`, `SALUDABLE`, `ITALIANA`, `MEXICANA`, `MARISCOS`, `OTRA`.
 
-### 3. Registrar repartidor
+### Repartidores (`/api/RepartidoresApi`)
 
-Pide datos básicos (cédula, nombre, correo, dirección, celular, tarjeta)  
-y crea un repartidor en estado `DISPONIBLE` con 0 amonestaciones.
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/registrar` | Registrar repartidor (body: cedula, nombre, correo, direccion, celular, tarjeta). |
+| GET | `/` | Lista de todos los repartidores. |
+| GET | `/cero-amonestaciones` | Repartidores con 0 amonestaciones. |
 
-### 4. Realizar pedido
+### Pedidos (`/api/PedidosApi`)
 
-Flujo resumido:
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/realizar` | Crear pedido (body: cedulaCliente, idRestaurante, distanciaKm, esFeriado, items[]). |
+| POST | `/marcar-entregado` | Marcar pedido entregado (body: idPedido, idRepartidor). |
 
-1. Muestra los restaurantes registrados.
-2. Pide **id restaurante**, **cédula cliente**, **distancia en km** y si es feriado.
-3. Pide los combos en formato `numeroCombo,cantidad` por línea (ej: `1,2`).  
-   - Si hay combos registrados en BD se usan sus precios/descriciones.  
-   - Si no, se usan precios fijos: combo 1=4000, 2=5000, …, 9=12000.
-4. `PedidoService`:
-   - Valida cliente (ACTIVO y existente).
-   - Asigna el primer repartidor `DISPONIBLE` con amonestaciones < 4.
-   - Calcula subtotal, costo de transporte, IVA 13 %, total.
-   - Inserta `Pedido`, `ItemPedido`s y `Factura`.
-   - Cambia al repartidor a estado `OCUPADO`.
+Cada item en `items` debe tener: `numeroCombo`, `descripcion`, `precioUnitario`, `cantidad`.
 
-Al final muestra el número de pedido y el total.
+### Reportes (`/api/ReportesApi`)
 
-### 5. Marcar pedido como entregado
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/restaurante-mas-pedidos` | Restaurante con más pedidos. |
+| GET | `/restaurante-menos-pedidos` | Restaurante con menos pedidos. |
+| GET | `/monto-por-restaurante` | Monto por restaurante. |
+| GET | `/monto-total` | Monto total general. |
+| GET | `/quejas-por-repartidor` | Quejas por repartidor. |
+| GET | `/pedidos-por-cliente` | Pedidos por cliente. |
+| GET | `/cliente-mas-pedidos` | Cliente con más pedidos. |
+| GET | `/hora-pico` | Hora pico. |
 
-Pide:
-
-- `idPedido`
-- `idRepartidor`
-
-`PedidoService.MarcarEntregado`:
-
-- Cambia el estado del pedido a `ENTREGADO` y registra la hora de entrega.
-- Cambia el repartidor nuevamente a `DISPONIBLE`.
-
-### 6. Reportes
-
-Al elegir la opción 6 se abre un submenú:
-
-```text
---- REPORTES ---
- e) Listado clientes ACTIVOS (id, cedula, nombre)
- f) Listado clientes SUSPENDIDOS
- g) Repartidores con 0 amonestaciones
- h) Listado restaurantes (nombre, ced.jur, dir, tipo)
- i) Restaurante con mas pedidos
- j) Monto por restaurante
- k) Total general
- l) Restaurante con menos pedidos
- m) Quejas por repartidor
- n) Pedidos por cliente
- o) Cliente con mas pedidos
- p) Hora pico
- Opcion:
-```
-
-- **e, f**: usan `ClienteController` para mostrar clientes **ACTIVOS** y **SUSPENDIDOS**.
-- **g**: usa `RepartidorController` para mostrar repartidores con 0 amonestaciones.
-- **h**: muestra todos los restaurantes.
-- **i–p**: usan `ReporteService` y las vistas `vw_PedidosPorRestaurante` y `vw_PedidosPorCliente`.
+Las respuestas son JSON. En caso de error de validación, la API devuelve 400 con un objeto `{ mensaje: "..." }`.
 
 ---
 
-## Notas útiles
+## Notas
 
-- La base de datos SQLite está en el archivo `cletaeats.db`.  
-  Puedes inspeccionarlo con cualquier GUI de SQLite (por ejemplo, DB Browser for SQLite).
-- Si cambias el `schema.sql`, borra el `cletaeats.db` para que se recree desde cero.
-- Todo corre en una sola aplicación de consola, **no** usa ASP.NET ni HTTP.
-
+- Base de datos: archivo **`cletaeats.db`** (SQLite). Se puede inspeccionar con DB Browser for SQLite u otra herramienta.
+- Si modificas `schema.sql`, borra `cletaeats.db` para que se regenere.
+- La URL y el puerto se pueden cambiar en `Properties/launchSettings.json` (perfil `CletaEatsBackend`).

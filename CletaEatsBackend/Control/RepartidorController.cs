@@ -1,4 +1,5 @@
 using CletaEatsBackend.LogicaNegocio;
+using CletaEatsBackend.Modelo;
 
 namespace CletaEatsBackend.Control
 {
@@ -17,6 +18,9 @@ namespace CletaEatsBackend.Control
             foreach (var r in _service.ObtenerConCeroAmonestaciones())
                 Console.WriteLine(r);
         }
+
+        public List<Repartidor> GetTodos() => _service.ObtenerTodos();
+        public List<Repartidor> GetConCeroAmonestaciones() => _service.ObtenerConCeroAmonestaciones();
 
         public void MostrarTodos()
         {
