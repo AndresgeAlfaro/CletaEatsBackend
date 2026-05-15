@@ -43,6 +43,11 @@ La SQL de las operaciones está en la tabla **`ProcedimientoAlmacenado`**; los D
 
 Al ejecutar por primera vez se crea **`cletaeats.db`** en el directorio de salida (o en el directorio de trabajo según la configuración de `DatabaseManager`).
 
+### Relación con el monorepo
+
+- La **app Android** (Lab04, carpeta `AplicacionMovil`) consume **Supabase**, no esta API.
+- El **Frontend** React usa Supabase por defecto; para probar esta API en local abre **`http://localhost:5173/#dotnet`** con el backend en marcha (véase `Frontend/README.md`).
+
 ---
 
 ## Cómo ejecutar la API
@@ -81,6 +86,8 @@ Base URL: `http://localhost:5000/api`
 | GET | `/verificar/{cedula}` | Verificar estado del cliente (ACTIVO / SUSPENDIDO / NO_REGISTRADO). |
 | GET | `/activos` | Lista de clientes activos. |
 | GET | `/suspendidos` | Lista de clientes suspendidos. |
+| PUT | `/{cedula}` | Actualizar cliente (body: nombre, direccion, tarjeta, celular, correo, suspendido). |
+| DELETE | `/{cedula}` | Eliminar cliente. |
 
 ### Restaurantes (`/api/RestaurantesApi`)
 
@@ -88,7 +95,12 @@ Base URL: `http://localhost:5000/api`
 |--------|------|-------------|
 | POST | `/registrar` | Registrar restaurante (body: nombre, cedulaJuridica, direccion, tipoComida). |
 | GET | `/` | Lista de todos los restaurantes. |
+| PUT | `/{id}` | Actualizar restaurante. |
+| DELETE | `/{id}` | Eliminar restaurante. |
 | GET | `/{idRestaurante}/combos` | Combos del restaurante. |
+| POST | `/{idRestaurante}/combos` | Agregar combo (body: descripcion, precio, numeroCombo opcional). |
+| PUT | `/{idRestaurante}/combos/{numeroCombo}` | Actualizar combo (body: descripcion, precio). |
+| DELETE | `/{idRestaurante}/combos/{numeroCombo}` | Eliminar combo. |
 
 Tipos de comida: `RAPIDA`, `CHINA`, `SALUDABLE`, `ITALIANA`, `MEXICANA`, `MARISCOS`, `OTRA`.
 
@@ -99,13 +111,18 @@ Tipos de comida: `RAPIDA`, `CHINA`, `SALUDABLE`, `ITALIANA`, `MEXICANA`, `MARISC
 | POST | `/registrar` | Registrar repartidor (body: cedula, nombre, correo, direccion, celular, tarjeta). |
 | GET | `/` | Lista de todos los repartidores. |
 | GET | `/cero-amonestaciones` | Repartidores con 0 amonestaciones. |
+| PUT | `/{id}` | Actualizar repartidor (body: cedula, nombre, correo, direccion, celular, tarjeta, amonestaciones). |
+| DELETE | `/{id}` | Eliminar repartidor. |
 
 ### Pedidos (`/api/PedidosApi`)
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
+| GET | `/` | Listado de pedidos con ítems (para la consola web). |
 | POST | `/realizar` | Crear pedido (body: cedulaCliente, idRestaurante, distanciaKm, esFeriado, items[]). |
 | POST | `/marcar-entregado` | Marcar pedido entregado (body: idPedido, idRepartidor). |
+| PATCH | `/{id}/observacion` | Actualizar observación (body: observacion). |
+| DELETE | `/{id}` | Eliminar pedido. |
 
 Cada item en `items` debe tener: `numeroCombo`, `descripcion`, `precioUnitario`, `cantidad`.
 

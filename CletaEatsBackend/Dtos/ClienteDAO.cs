@@ -65,6 +65,40 @@ namespace CletaEatsBackend.AccesoDatos
             cmd.ExecuteNonQuery();
         }
 
+        public bool ActualizarDatos(Cliente c)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Cliente_ActualizarDatos");
+                cmd.Parameters.AddWithValue("@nom", c.Nombre);
+                cmd.Parameters.AddWithValue("@dir", c.DireccionExacta);
+                cmd.Parameters.AddWithValue("@tar", c.NumeroTarjeta);
+                cmd.Parameters.AddWithValue("@cel", c.NumeroCelular);
+                cmd.Parameters.AddWithValue("@cor", c.CorreoElectronico);
+                cmd.Parameters.AddWithValue("@est", c.Estado.ToString());
+                cmd.Parameters.AddWithValue("@ced", c.Cedula);
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SqliteException) { return false; }
+        }
+
+        public bool EliminarPorCedula(string cedula)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Cliente_EliminarPorCedula");
+                cmd.Parameters.AddWithValue("@ced", cedula);
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SqliteException) { return false; }
+        }
+
         private static Cliente Mapear(SqliteDataReader r) => new Cliente(
             r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3),
             r.GetString(4), r.GetString(5), r.GetString(6),

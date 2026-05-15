@@ -20,6 +20,13 @@ namespace CletaEatsBackend.Control
         public List<Cliente> GetActivos() => _service.ObtenerActivos();
         public List<Cliente> GetSuspendidos() => _service.ObtenerSuspendidos();
 
+        public string Actualizar(string cedula, string nombre, string direccion, string tarjeta, string celular, string correo, bool suspendido)
+        {
+            return _service.Actualizar(cedula, nombre, direccion, tarjeta, celular, correo, suspendido);
+        }
+
+        public string Eliminar(string cedula) => _service.Eliminar(cedula);
+
         public void MostrarActivos()
         {
             Console.WriteLine("\n=== Clientes ACTIVOS ===");

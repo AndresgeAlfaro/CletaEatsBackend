@@ -69,6 +69,25 @@ namespace CletaEatsBackend.Datos
             using var cmd = conn.CreateCommand();
             cmd.CommandText = schema;
             cmd.ExecuteNonQuery();
+            EnsurePedidoObservacionColumn(conn);
+            _procedimientosCache = null;
+        }
+
+        private static void EnsurePedidoObservacionColumn(SqliteConnection conn)
+        {
+            var cols = new List<string>();
+            using (var pragma = conn.CreateCommand())
+            {
+                pragma.CommandText = "PRAGMA table_info(Pedido)";
+                using var r = pragma.ExecuteReader();
+                while (r.Read())
+                    cols.Add(r.GetString(1));
+            }
+            if (cols.Exists(c => string.Equals(c, "observacion", StringComparison.OrdinalIgnoreCase)))
+                return;
+            using var alter = conn.CreateCommand();
+            alter.CommandText = "ALTER TABLE Pedido ADD COLUMN observacion TEXT NOT NULL DEFAULT ''";
+            alter.ExecuteNonQuery();
         }
     }
 }

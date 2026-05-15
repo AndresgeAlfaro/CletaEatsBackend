@@ -37,6 +37,15 @@ namespace CletaEatsBackend.AccesoDatos
             return r.Read() ? Mapear(r) : null;
         }
 
+        public void EliminarPorPedido(int idPedido)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Factura_EliminarPorPedido");
+            cmd.Parameters.AddWithValue("@id", idPedido);
+            cmd.ExecuteNonQuery();
+        }
+
         private static Factura Mapear(SqliteDataReader r)
         {
             var f = new Factura

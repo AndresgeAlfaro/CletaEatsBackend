@@ -65,5 +65,26 @@ namespace CletaEatsBackend.LogicaNegocio
 
         public List<Pedido> ObtenerPorCliente(int idCliente) => _pedidoDAO.ObtenerPorCliente(idCliente);
         public Pedido? BuscarPorId(int id) => _pedidoDAO.BuscarPorId(id);
+
+        public string ActualizarObservacion(int idPedido, string observacion)
+        {
+            if (_pedidoDAO.BuscarPorId(idPedido) == null)
+                return "Error: pedido no encontrado.";
+            _pedidoDAO.ActualizarObservacion(idPedido, observacion ?? "");
+            return "Observacion guardada.";
+        }
+
+        public string EliminarPedido(int idPedido)
+        {
+            var p = _pedidoDAO.BuscarPorId(idPedido);
+            if (p == null)
+                return "Error: pedido no encontrado.";
+            _facturaDAO.EliminarPorPedido(idPedido);
+            _itemDAO.EliminarPorPedido(idPedido);
+            _pedidoDAO.Eliminar(idPedido);
+            if (p.Estado != EstadoPedido.ENTREGADO && p.Estado != EstadoPedido.SUSPENDIDO)
+                _repartidorDAO.ActualizarEstado(p.IdRepartidor, EstadoRepartidor.DISPONIBLE);
+            return $"Pedido #{idPedido} eliminado.";
+        }
     }
 }

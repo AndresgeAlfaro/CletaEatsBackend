@@ -1,0 +1,34 @@
+/* Barra superior más compacta; logo Swagger sin dominar */
+.swagger-ui .topbar {
+  padding: 6px 0;
+  min-height: unset;
+}
+
+.swagger-ui .topbar-wrapper img {
+  max-height: 28px;
+  width: auto;
+}
+
+.swagger-ui .topbar .download-url-wrapper {
+  max-width: min(420px, 92vw);
+}
+
+.swagger-ui .info {
+  margin: 16px 0 12px;
+}
+
+.swagger-ui .info .title {
+  font-size: 1.35rem;
+}
+
+.swagger-ui .scheme-container {
+  padding: 8px 0 12px;
+}
+
+.swagger-ui .opblock .opblock-summary-description {
+  font-size: 0.9rem;
+}
+
+.swagger-ui .model-box {
+  font-size: 0.85rem;
+}

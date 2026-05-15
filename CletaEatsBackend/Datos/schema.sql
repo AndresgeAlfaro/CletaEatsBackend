@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS Pedido (
   horaEntrega TEXT,
   estado TEXT NOT NULL DEFAULT 'EN_PREPARACION'
   CHECK ( estado IN ('EN_PREPARACION', 'EN_CAMINO', 'ENTREGADO', 'SUSPENDIDO') ),
+  observacion TEXT NOT NULL DEFAULT '',
   FOREIGN KEY ( idCliente ) REFERENCES Cliente ( id ),
   FOREIGN KEY ( idRestaurante ) REFERENCES Restaurante ( id ),
   FOREIGN KEY ( idRepartidor ) REFERENCES Repartidor ( id )
@@ -146,6 +147,8 @@ INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_BuscarPorCed
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_Insertar', 'INSERT INTO Combo (idRestaurante, numeroCombo, descripcion, precio) VALUES (@idRest, @num, @desc, @precio)');
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_ObtenerPorRestaurante', 'SELECT * FROM Combo WHERE idRestaurante = @id ORDER BY numeroCombo');
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_BuscarPorRestauranteYNumero', 'SELECT * FROM Combo WHERE idRestaurante = @id AND numeroCombo = @num');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_Eliminar', 'DELETE FROM Combo WHERE idRestaurante = @id AND numeroCombo = @num');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_Actualizar', 'UPDATE Combo SET descripcion = @desc, precio = @precio WHERE idRestaurante = @id AND numeroCombo = @num');
 
 -- Repartidor
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_Insertar', 'INSERT INTO Repartidor (nombre, cedula, correo, direccion, celular, tarjeta, estado, distanciaPedido, kmDiarios, amonestaciones) VALUES (@nom, @ced, @cor, @dir, @cel, @tar, @est, @dist, @km, @amon)');
@@ -185,3 +188,18 @@ INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_QuejasPorReparti
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_PedidosPorCliente', 'SELECT c.nombre, c.cedula, p.id, p.horaRealizacion, p.estado FROM Cliente c LEFT JOIN Pedido p ON p.idCliente = c.id ORDER BY c.nombre, p.horaRealizacion');
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_ClienteConMasPedidos', 'SELECT nombreCliente, cedula, totalPedidos FROM vw_PedidosPorCliente ORDER BY totalPedidos DESC LIMIT 1');
 INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Reporte_HoraPico', 'SELECT SUBSTR(horaRealizacion, 12, 2) AS hora, COUNT(*) AS cnt FROM Pedido GROUP BY hora ORDER BY cnt DESC LIMIT 1');
+
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Factura_EliminarPorPedido', 'DELETE FROM Factura WHERE idPedido = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('ItemPedido_EliminarPorPedido', 'DELETE FROM ItemPedido WHERE idPedido = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_Eliminar', 'DELETE FROM Pedido WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ActualizarObservacion', 'UPDATE Pedido SET observacion = @obs WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ContarPorRestaurante', 'SELECT COUNT(*) FROM Pedido WHERE idRestaurante = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ContarPorCliente', 'SELECT COUNT(*) FROM Pedido WHERE idCliente = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Pedido_ContarPorRepartidor', 'SELECT COUNT(*) FROM Pedido WHERE idRepartidor = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Combo_EliminarTodosRestaurante', 'DELETE FROM Combo WHERE idRestaurante = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_Actualizar', 'UPDATE Restaurante SET nombre = @nom, cedulaJuridica = @ced, direccion = @dir, tipoComida = @tipo WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Restaurante_Eliminar', 'DELETE FROM Restaurante WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Cliente_ActualizarDatos', 'UPDATE Cliente SET nombre = @nom, direccion = @dir, tarjeta = @tar, celular = @cel, correo = @cor, estado = @est WHERE cedula = @ced');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Cliente_EliminarPorCedula', 'DELETE FROM Cliente WHERE cedula = @ced');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_ActualizarDatos', 'UPDATE Repartidor SET nombre = @nom, cedula = @ced, correo = @cor, direccion = @dir, celular = @cel, tarjeta = @tar, amonestaciones = @amon WHERE id = @id');
+INSERT OR REPLACE INTO ProcedimientoAlmacenado VALUES ('Repartidor_Eliminar', 'DELETE FROM Repartidor WHERE id = @id');

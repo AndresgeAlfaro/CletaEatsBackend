@@ -48,6 +48,36 @@ namespace CletaEatsBackend.AccesoDatos
             return r.Read() ? Mapear(r) : null;
         }
 
+        public bool Eliminar(int idRestaurante, int numeroCombo)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Combo_Eliminar");
+                cmd.Parameters.AddWithValue("@id", idRestaurante);
+                cmd.Parameters.AddWithValue("@num", numeroCombo);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (SqliteException) { return false; }
+        }
+
+        public bool Actualizar(int idRestaurante, int numeroCombo, string descripcion, double precio)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Combo_Actualizar");
+                cmd.Parameters.AddWithValue("@id", idRestaurante);
+                cmd.Parameters.AddWithValue("@num", numeroCombo);
+                cmd.Parameters.AddWithValue("@desc", descripcion);
+                cmd.Parameters.AddWithValue("@precio", precio);
+                return cmd.ExecuteNonQuery() > 0;
+            }
+            catch (SqliteException) { return false; }
+        }
+
         private static Combo Mapear(SqliteDataReader r) => new Combo(
             r.GetInt32(0), r.GetInt32(1), r.GetInt32(2), r.GetString(3), r.GetDouble(4));
     }

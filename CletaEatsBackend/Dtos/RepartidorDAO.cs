@@ -70,6 +70,41 @@ namespace CletaEatsBackend.AccesoDatos
             cmd.ExecuteNonQuery();
         }
 
+        public bool ActualizarDatos(Repartidor r)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_ActualizarDatos");
+                cmd.Parameters.AddWithValue("@nom", r.Nombre);
+                cmd.Parameters.AddWithValue("@ced", r.Cedula);
+                cmd.Parameters.AddWithValue("@cor", r.CorreoElectronico);
+                cmd.Parameters.AddWithValue("@dir", r.DireccionExacta);
+                cmd.Parameters.AddWithValue("@cel", r.NumeroCelular);
+                cmd.Parameters.AddWithValue("@tar", r.NumeroTarjeta);
+                cmd.Parameters.AddWithValue("@amon", r.NumeroAmonestaciones);
+                cmd.Parameters.AddWithValue("@id", r.Id);
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SqliteException) { return false; }
+        }
+
+        public bool Eliminar(int id)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Repartidor_Eliminar");
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SqliteException) { return false; }
+        }
+
         private static Repartidor Mapear(SqliteDataReader r) => new Repartidor(
             r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3),
             r.GetString(4), r.GetString(5), r.GetString(6),

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CletaEats API</title>
+  <link rel="stylesheet" href="/css/portal.css" />
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>CletaEats · API</h1>
+      <p class="lead">
+        Punto de entrada del backend. Desde aquí puedes probar los endpoints o ver qué ofrece cada módulo.
+      </p>
+    </header>
+
+    <div class="actions">
+      <a class="btn btn--primary" href="/swagger">Abrir Swagger (probar API)</a>
+      <a class="btn btn--ghost" href="/api/RestaurantesApi">GET restaurantes (JSON)</a>
+    </div>
+
+    <p class="sections-title">Módulos</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card__icon" aria-hidden="true">👤</div>
+        <h2>Clientes</h2>
+        <p><code>/api/ClientesApi</code> — registro, verificación, listas activos / suspendidos.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon" aria-hidden="true">🍽️</div>
+        <h2>Restaurantes</h2>
+        <p><code>/api/RestaurantesApi</code> — registro, listado y combos por restaurante.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon" aria-hidden="true">🚴</div>
+        <h2>Repartidores</h2>
+        <p><code>/api/RepartidoresApi</code> — registro, listado y sin amonestaciones.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon" aria-hidden="true">📦</div>
+        <h2>Pedidos</h2>
+        <p><code>/api/PedidosApi</code> — crear pedido y marcar entregado.</p>
+      </div>
+      <div class="card">
+        <div class="card__icon" aria-hidden="true">📊</div>
+        <h2>Reportes</h2>
+        <p><code>/api/ReportesApi</code> — totales, horas pico, rankings y más.</p>
+      </div>
+    </div>
+
+    <footer>
+      Base URL en desarrollo: <code>http://localhost:5000/api/…</code> · CORS habilitado para el frontend en puerto 5173.
+    </footer>
+  </div>
+</body>
+</html>

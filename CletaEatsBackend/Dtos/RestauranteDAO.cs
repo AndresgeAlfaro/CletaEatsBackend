@@ -56,6 +56,47 @@ namespace CletaEatsBackend.AccesoDatos
             return r.Read() ? Mapear(r) : null;
         }
 
+        public bool Actualizar(Restaurante r)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Restaurante_Actualizar");
+                cmd.Parameters.AddWithValue("@id", r.Id);
+                cmd.Parameters.AddWithValue("@nom", r.Nombre);
+                cmd.Parameters.AddWithValue("@ced", r.CedulaJuridica);
+                cmd.Parameters.AddWithValue("@dir", r.Direccion);
+                cmd.Parameters.AddWithValue("@tipo", r.TipoComida.ToString());
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SqliteException) { return false; }
+        }
+
+        public void EliminarCombosDeRestaurante(int idRestaurante)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Combo_EliminarTodosRestaurante");
+            cmd.Parameters.AddWithValue("@id", idRestaurante);
+            cmd.ExecuteNonQuery();
+        }
+
+        public bool Eliminar(int id)
+        {
+            try
+            {
+                using var conn = _db.GetConnection(); conn.Open();
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = _db.GetSqlProcedimiento("Restaurante_Eliminar");
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+                return true;
+            }
+            catch (SqliteException) { return false; }
+        }
+
         private static Restaurante Mapear(SqliteDataReader r) => new Restaurante(
             r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetString(3),
             Enum.Parse<TipoComida>(r.GetString(4)));

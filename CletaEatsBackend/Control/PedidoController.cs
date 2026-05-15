@@ -19,5 +19,10 @@ namespace CletaEatsBackend.Control
         {
             return _service.MarcarEntregado(idPedido, idRepartidor);
         }
+
+        public string ActualizarObservacion(int idPedido, string observacion) =>
+            _service.ActualizarObservacion(idPedido, observacion);
+
+        public string EliminarPedido(int idPedido) => _service.EliminarPedido(idPedido);
     }
 }

@@ -33,6 +33,15 @@ namespace CletaEatsBackend.AccesoDatos
             return lista;
         }
 
+        public void EliminarPorPedido(int idPedido)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("ItemPedido_EliminarPorPedido");
+            cmd.Parameters.AddWithValue("@id", idPedido);
+            cmd.ExecuteNonQuery();
+        }
+
         private static ItemPedido Mapear(SqliteDataReader r) => new ItemPedido(
             r.GetInt32(0), r.GetInt32(1), r.GetInt32(2), r.GetString(3), r.GetDouble(4), r.GetInt32(5));
     }

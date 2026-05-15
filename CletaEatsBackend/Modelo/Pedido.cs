@@ -11,6 +11,7 @@ namespace CletaEatsBackend.Modelo
         public string HoraRealizacion { get; set; } = "";
         public string? HoraEntrega { get; set; }
         public EstadoPedido Estado { get; set; }
+        public string Observacion { get; set; } = "";
 
         public Pedido() { Estado = EstadoPedido.EN_PREPARACION; }
 

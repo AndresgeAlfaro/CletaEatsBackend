@@ -22,6 +22,13 @@ namespace CletaEatsBackend.Control
         public List<Repartidor> GetTodos() => _service.ObtenerTodos();
         public List<Repartidor> GetConCeroAmonestaciones() => _service.ObtenerConCeroAmonestaciones();
 
+        public string Actualizar(int id, string cedula, string nombre, string correo, string direccion, string celular, string tarjeta, int amonestaciones)
+        {
+            return _service.Actualizar(id, cedula, nombre, correo, direccion, celular, tarjeta, amonestaciones);
+        }
+
+        public string Eliminar(int id) => _service.Eliminar(id);
+
         public void MostrarTodos()
         {
             Console.WriteLine("\n=== Repartidores ===");

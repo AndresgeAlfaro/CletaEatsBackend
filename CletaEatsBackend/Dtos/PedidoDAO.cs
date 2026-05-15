@@ -75,9 +75,64 @@ namespace CletaEatsBackend.AccesoDatos
             return r.Read() ? Mapear(r) : null;
         }
 
-        private static Pedido Mapear(SqliteDataReader r) => new Pedido(
-            r.GetInt32(0), r.GetInt32(1), r.GetInt32(2), r.GetInt32(3),
-            r.GetString(4), r.IsDBNull(5) ? null : r.GetString(5),
-            Enum.Parse<EstadoPedido>(r.GetString(6)));
+        public void ActualizarObservacion(int idPedido, string observacion)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_ActualizarObservacion");
+            cmd.Parameters.AddWithValue("@obs", observacion ?? "");
+            cmd.Parameters.AddWithValue("@id", idPedido);
+            cmd.ExecuteNonQuery();
+        }
+
+        public void Eliminar(int idPedido)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_Eliminar");
+            cmd.Parameters.AddWithValue("@id", idPedido);
+            cmd.ExecuteNonQuery();
+        }
+
+        public int ContarPorRestaurante(int idRestaurante)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_ContarPorRestaurante");
+            cmd.Parameters.AddWithValue("@id", idRestaurante);
+            var n = cmd.ExecuteScalar();
+            return Convert.ToInt32(n);
+        }
+
+        public int ContarPorCliente(int idCliente)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_ContarPorCliente");
+            cmd.Parameters.AddWithValue("@id", idCliente);
+            var n = cmd.ExecuteScalar();
+            return Convert.ToInt32(n);
+        }
+
+        public int ContarPorRepartidor(int idRepartidor)
+        {
+            using var conn = _db.GetConnection(); conn.Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = _db.GetSqlProcedimiento("Pedido_ContarPorRepartidor");
+            cmd.Parameters.AddWithValue("@id", idRepartidor);
+            var n = cmd.ExecuteScalar();
+            return Convert.ToInt32(n);
+        }
+
+        private static Pedido Mapear(SqliteDataReader r)
+        {
+            var p = new Pedido(
+                r.GetInt32(0), r.GetInt32(1), r.GetInt32(2), r.GetInt32(3),
+                r.GetString(4), r.IsDBNull(5) ? null : r.GetString(5),
+                Enum.Parse<EstadoPedido>(r.GetString(6)));
+            if (r.FieldCount > 7 && !r.IsDBNull(7))
+                p.Observacion = r.GetString(7);
+            return p;
+        }
     }
 }

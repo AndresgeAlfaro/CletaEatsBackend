@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using CletaEatsBackend.Control;
+using CletaEatsBackend.Infra;
 
 namespace CletaEatsBackend.Api
 {
@@ -7,38 +7,113 @@ namespace CletaEatsBackend.Api
     [Route("api/[controller]")]
     public class ReportesApiController : ControllerBase
     {
-        private readonly ReporteController _ctrl = new();
+        private readonly SupabaseRestService _sb;
+
+        public ReportesApiController(SupabaseRestService sb) => _sb = sb;
 
         [HttpGet("restaurante-mas-pedidos")]
-        public IActionResult RestauranteConMasPedidos() =>
-            Ok(new { texto = _ctrl.GetRestauranteConMasPedidos() });
+        public async Task<IActionResult> RestauranteConMasPedidos()
+        {
+            try
+            {
+                return Ok(new { texto = await _sb.ReporteRestauranteMasPedidosAsync() });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("restaurante-menos-pedidos")]
-        public IActionResult RestauranteConMenosPedidos() =>
-            Ok(new { texto = _ctrl.GetRestauranteConMenosPedidos() });
+        public async Task<IActionResult> RestauranteConMenosPedidos()
+        {
+            try
+            {
+                return Ok(new { texto = await _sb.ReporteRestauranteMenosPedidosAsync() });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("monto-por-restaurante")]
-        public IActionResult MontoPorRestaurante() =>
-            Ok(_ctrl.GetMontoPorRestaurante().Select(x => new { nombre = x.nombre, monto = x.monto }));
+        public async Task<IActionResult> MontoPorRestaurante()
+        {
+            try
+            {
+                var rows = await _sb.ReporteMontoPorRestauranteAsync();
+                return Ok(rows.Select(x => new { nombre = x.nombre, monto = x.monto }));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("monto-total")]
-        public IActionResult MontoTotal() =>
-            Ok(new { total = _ctrl.GetMontoTotalGeneral() });
+        public async Task<IActionResult> MontoTotal()
+        {
+            try
+            {
+                return Ok(new { total = await _sb.ReporteMontoTotalAsync() });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("quejas-por-repartidor")]
-        public IActionResult QuejasPorRepartidor() =>
-            Ok(_ctrl.GetQuejasPorRepartidor());
+        public async Task<IActionResult> QuejasPorRepartidor()
+        {
+            try
+            {
+                return Ok(await _sb.ReporteQuejasPorRepartidorAsync());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("pedidos-por-cliente")]
-        public IActionResult PedidosPorCliente() =>
-            Ok(_ctrl.GetPedidosPorCliente());
+        public async Task<IActionResult> PedidosPorCliente()
+        {
+            try
+            {
+                return Ok(await _sb.ReportePedidosPorClienteAsync());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("cliente-mas-pedidos")]
-        public IActionResult ClienteConMasPedidos() =>
-            Ok(new { texto = _ctrl.GetClienteConMasPedidos() });
+        public async Task<IActionResult> ClienteConMasPedidos()
+        {
+            try
+            {
+                return Ok(new { texto = await _sb.ReporteClienteMasPedidosAsync() });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
 
         [HttpGet("hora-pico")]
-        public IActionResult HoraPico() =>
-            Ok(new { texto = _ctrl.GetHoraPico() });
+        public async Task<IActionResult> HoraPico()
+        {
+            try
+            {
+                return Ok(new { texto = await _sb.ReporteHoraPicoAsync() });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
     }
 }
